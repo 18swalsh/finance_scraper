@@ -7,22 +7,25 @@ import itertools
 from tabulate import tabulate
 import types
 import datetime
+import time
+
 
 d_valid = False
 #---------------------------- Get earnings announcements for a given date ----------------------------------------------
-#WORKS - JUST ANNOYING TO INPUT THE DATE FOR DEBUGGING PURPOSES
+date = ""
+while d_valid == False:
+    date = str(raw_input("Enter a date or type 'exit' (Format: YYYY-MM-DD): "))
+    try:
+        datetime.datetime.strptime(date, '%Y-%m-%d')
+        d_valid = True
+    except:
+        if date =='exit':
+            print "bye"
+            exit()
+        else:
+            print "Nah" + "\n"
 
-# while d_valid == False:
-#     date = str(raw_input("Enter a date or type 'exit' (Format: YYYY-MM-DD): "))
-#     try:
-#         datetime.datetime.strptime(date, '%Y-%m-%d')
-#         d_valid = True
-#     except:
-#         if date =='exit':
-#             print "bye"
-#             exit()
-#         else:
-#             print "Nah" + "\n"
+start_time = time.time()
 
 def pretty_print(table_title, table_to_print):
     df = pd.read_html(str(table_to_print))
@@ -37,7 +40,7 @@ def replace_with_newlines(element):
             text += '\n'
     return text
 
-date = "2017-09-19"
+#date = "2017-09-19"
 
 url = "finance.yahoo.com/calendar/earnings?day=" + date
 r  = requests.get("https://" + url)
@@ -69,6 +72,8 @@ for line in spl:
 
 #-----------------------add more info for known tickers-----------------------------------------------------------------
 #https://finance.yahoo.com/quote/TICKER?p=TICKER - stock page
+
+print "-----------------------------SUMMARY-----------------------------"
 
 ticker_urls = []
 
@@ -109,7 +114,7 @@ for ticker_url in ticker_urls:
     except:
         print "Stock Quote Unavailable"
 
-print "!!!!!!!!!!!!!!!!         STATISTICS          !!!!!!!!!!!!!!!!!!!!!"
+print "-----------------------------STATISTICS-----------------------------"
 #Statistics---------------------------------------------------------------------------------------------------------
 ticker_urls = []
 stat_heads = []
@@ -144,7 +149,7 @@ for ticker_url in ticker_urls:
     except:
         "Stock Stats Unavailable"
 
-print "!!!!!!!!!!!!!!!!         PROFILE          !!!!!!!!!!!!!!!!!!!!!"
+print "-----------------------------PROFILE-----------------------------"
 #Profile------------------------------------------------------------------------------------------------------------
 ticker_urls = []
 
@@ -182,17 +187,114 @@ for ticker_url in ticker_urls:
     except:
         "Stock Profile Unavailable"
 
-print "!!!!!!!!!!!!!!!!         FINANCIALS                 !!!!!!!!!!!!!!!!!!!!!"
-#Financials (marketwatch.com----------------------------------------------------------------------------------------
+print "-----------------------------FINANCIALS-----------------------------"
+# Financials (marketwatch.com)----------------------------------------------------------------------------------------
+ticker_urls = []
+
+# INCOME STATEMENT-----------------------------------------------------
+for ticker in tickers:
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials")
+
+# Run for each URL
+for ticker_url in ticker_urls:
+    r = requests.get(ticker_url)
+    data = r.text
+    soup = BeautifulSoup(data, "html5lib")
+
+    try:
+        # Company Name
+        c_name = soup.find('h1', id='instrumentname')
+        print c_name.get_text()
+        print "Income Statement"
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            pretty_print("", fin_table)
+    except:
+        "Stock Financials Unavailable"
+
+# BALANCE SHEET ----------------------------------------------------
+ticker_urls = []
+
+for ticker in tickers:
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials/balance-sheet")
+
+# Run for each URL
+for ticker_url in ticker_urls:
+    r = requests.get(ticker_url)
+    data = r.text
+    soup = BeautifulSoup(data, "html5lib")
+    fin_heads = []
+    x = 0
+    y = 0
+    try:
+        # Company Name
+        c_name = soup.find('h1', id='instrumentname')
+        print c_name.get_text()
+        print "Balance Sheet"
+        fin_headers = soup.find_all('h2')
+        for fin_header in fin_headers:
+            fin_heads.append(fin_header.get_text())
+        # only want the 2nd and 3rd
+        fin_heads.pop(0)
+
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            if len(fin_tables) == 3:
+                if x == 0 or x == 2:
+                    pretty_print(fin_heads[y], fin_table)
+                    y += 1
+                else:
+                    pretty_print("", fin_table)
+            elif len(fin_tables) == 2:
+                pretty_print(fin_heads[x], fin_table)
+            else:
+                pretty_print("", fin_table)
+            x += 1
+    except:
+        "Stock Financials Unavailable"
+
+# CASH FLOW STATEMENT -----------------------------------------------
+
+ticker_urls = []
+
+for ticker in tickers:
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials/cash-flow")
+
+# Run for each URL
+for ticker_url in ticker_urls:
+    r = requests.get(ticker_url)
+    data = r.text
+    soup = BeautifulSoup(data, "html5lib")
+    fin_heads = []
+    x = 0
+    y = 0
+    try:
+        # Company Name
+        c_name = soup.find('h1', id='instrumentname')
+        print c_name.get_text()
+        print "Cash Flow Statement"
+        fin_headers = soup.find_all('h2')
+        for fin_header in fin_headers:
+            fin_heads.append(fin_header.get_text())
+        # only want the 2nd and 3rd
+        fin_heads.pop(0)
+
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            pretty_print(fin_heads[x], fin_table)
+            x += 1
+
+    except:
+        "Stock Financials Unavailable"
 
 
 
 #Historical Data ----- (potentially download) ----------------------------------------------------------------------
-print  "!!!!!!!!!!!!!!           HISTORICAL DATA (download file)       !!!!!!!!!!!!!!!!!!"
+print  "-----------------------------HISTORICAL DATA (download file)-----------------------------"
+print "To be completed"
 
 
-
-print "!!!!!!!!!!!!!!!!              ANALYSTS                      !!!!!!!!!!!!!!!!!!!!!"
+print "-----------------------------ANALYSTS-----------------------------"
 #Analysts------------------------------------------------------------------------------------------------------------
 
 ticker_urls = []
@@ -229,10 +331,8 @@ for ticker_url in ticker_urls:
         # for c in cols:
         #     print c.get_text()
 
-
-
     except:
         "Stock Profile Unavailable"
 
-
+print "Program took", (time.time() - start_time)/60 , "minutes to run"
 

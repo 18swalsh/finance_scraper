@@ -43,36 +43,101 @@ for line in spl:
     tickers.append(line[0])
     print line
 
-#Statistics---------------------------------------------------------------------------------------------------------
+# Financials (marketwatch.com)----------------------------------------------------------------------------------------
 ticker_urls = []
-stat_heads = []
-# Stock Quote Page
+
+# INCOME STATEMENT-----------------------------------------------------
 for ticker in tickers:
-    ticker_urls.append("https://finance.yahoo.com/quote/" + ticker + "/key-statistics?p=" + ticker)
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials")
 
 # Run for each URL
 for ticker_url in ticker_urls:
     r = requests.get(ticker_url)
     data = r.text
     soup = BeautifulSoup(data, "html5lib")
-    x = 0
+
     try:
         # Company Name
-        c_name = soup.find('h1', ['class', 'D(ib)'])
-        stat_tables = soup.find_all('table', ['class', 'table-qsp-stats Mt(10px)'])
-
+        c_name = soup.find('h1', id='instrumentname')
         print c_name.get_text()
-        stat_headers = soup.find_all(True, {'class':['Pt(20px)','Pt(6px) Pstart(20px)','Fz(s) Mt(20px)']})
-        for stat_header in stat_headers:
-            stat_heads.append(stat_header.get_text())
+        print "Income Statement"
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            pretty_print("", fin_table)
+    except:
+        "Stock Financials Unavailable"
 
+# BALANCE SHEET ----------------------------------------------------
+ticker_urls = []
 
-        for stat_table in stat_tables:
-            if stat_heads[x] == "Financial Highlights" or stat_heads[x] == "Trading Information":
-                pretty_print(stat_heads[x] + "\n" + "\n" + stat_heads[x+1],stat_table)
-                x += 1
+for ticker in tickers:
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials/balance-sheet")
+
+# Run for each URL
+for ticker_url in ticker_urls:
+    r = requests.get(ticker_url)
+    data = r.text
+    soup = BeautifulSoup(data, "html5lib")
+    fin_heads = []
+    x = 0
+    y = 0
+    try:
+        # Company Name
+        c_name = soup.find('h1', id='instrumentname')
+        print c_name.get_text()
+        print "Balance Sheet"
+        fin_headers = soup.find_all('h2')
+        for fin_header in fin_headers:
+            fin_heads.append(fin_header.get_text())
+        # only want the 2nd and 3rd
+        fin_heads.pop(0)
+
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            if len(fin_tables) == 3:
+                if x == 0 or x == 2:
+                    pretty_print(fin_heads[y], fin_table)
+                    y += 1
+                else:
+                    pretty_print("", fin_table)
+            elif len(fin_tables) == 2:
+                pretty_print(fin_heads[x], fin_table)
             else:
-                pretty_print(stat_heads[x], stat_table)
+                pretty_print("", fin_table)
             x += 1
     except:
-        "Stock Stats Unavailable"
+        "Stock Financials Unavailable"
+
+# CASH FLOW STATEMENT -----------------------------------------------
+
+ticker_urls = []
+
+for ticker in tickers:
+    ticker_urls.append("http://www.marketwatch.com/investing/stock/" + ticker + "/financials/cash-flow")
+
+# Run for each URL
+for ticker_url in ticker_urls:
+    r = requests.get(ticker_url)
+    data = r.text
+    soup = BeautifulSoup(data, "html5lib")
+    fin_heads = []
+    x = 0
+    y = 0
+    try:
+        # Company Name
+        c_name = soup.find('h1', id='instrumentname')
+        print c_name.get_text()
+        print "Cash Flow Statement"
+        fin_headers = soup.find_all('h2')
+        for fin_header in fin_headers:
+            fin_heads.append(fin_header.get_text())
+        # only want the 2nd and 3rd
+        fin_heads.pop(0)
+
+        fin_tables = soup.find_all('table', ['class', 'crDataTable'])
+        for fin_table in fin_tables:
+            pretty_print(fin_heads[x], fin_table)
+            x += 1
+
+    except:
+        "Stock Financials Unavailable"
