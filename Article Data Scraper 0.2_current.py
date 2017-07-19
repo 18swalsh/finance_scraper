@@ -28,9 +28,10 @@ d_valid = True
 #         d_valid = True
 #     except:
 #         if date =='exit':
+#             print "bye"
 #             exit()
 #         else:
-#             print "Please enter a valid date" + "\n"
+#             print "Nah" + "\n"
 
 start_time = time.time()
 time_one = time.time() #----------------------------------------------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ def removekey(d, key):
     del r[key]
     return r
 
-date = "2017-09-19"
+date = "2017-07-20"
 
 url = "finance.yahoo.com/calendar/earnings?day=" + date
 r  = requests.get("https://" + url)
@@ -124,14 +125,7 @@ for ticker_url in ticker_urls:
             tickers.remove(tickers[x])
             x -= 1
             continue
-        # Company Name
-        c_name = soup.find('h1', ['class', 'D(ib)'])
-        #print "Company: " + c_name.get_text()
-        #print "Current Price: " + cur_price.get_text()
-        #pretty_print("Summary", summary_table)
-        data_dict[tickers[x]].extend((c_name.get_text(),cur_price.get_text(),("Summary",pd.read_html(str(summary_table)))))
-
-        #remove companies with a market cap over 10B
+        # remove companies with a market cap over 10B
         market_cap = 0
         market_caps = summary_table[1].find_all('tr')
         market_cap_string = market_caps[0].get_text()[10:]
@@ -146,6 +140,12 @@ for ticker_url in ticker_urls:
             tickers.remove(tickers[x])
             x -= 1
             continue
+        # Company Name
+        c_name = soup.find('h1', ['class', 'D(ib)'])
+        #print "Company: " + c_name.get_text()
+        #print "Current Price: " + cur_price.get_text()
+        #pretty_print("Summary", summary_table)
+        data_dict[tickers[x]].extend((c_name.get_text(),cur_price.get_text(),("Summary",pd.read_html(str(summary_table)))))
 
     except:
         #print "Stock Quote Unavailable"
@@ -276,6 +276,7 @@ for ticker_url in ticker_urls:
         geo_con_web = replace_with_newlines(soup.find('p', ['class', 'D(ib) W(47.727%) Pend(40px)']))
         sec_ind_emp = replace_with_newlines(soup.find('p', ['class', 'D(ib) Va(t)']))
         execs_table = soup.find_all('table', ['class', 'W(100%)'])
+        #execs = execs_table[0].findChildren()
         descript = replace_with_newlines(soup.find('p',['class','Mt(15px) Lh(1.6)']))
 
         #print c_name.get_text()
@@ -426,9 +427,23 @@ print "Program took", (time.time() - start_time)/60 , "minutes to run"
 time_nine = time.time() #----------------------------------------------------------------------------------------------------------------------
 
 print time_two - time_one, time_three - time_two, time_four - time_three, time_five - time_four, time_six - time_five, time_seven - time_six, time_eight - time_seven, time_nine - time_eight
-print data_dict
+#print data_dict
 
 x = 0
+#Test querying the dicitonary
+
+#Test 3
+# try:
+#     print "test3 - Summary with data table", data_dict[tickers[x]][2]
+# except:
+#     pass
+#
+# #Test 4
+# try:
+#     print "test3 - 'Summary'", pd.DataFrame(data_dict[tickers[x]][2][1])
+# except:
+#     pass
+
 
 #Look into "Stock Financials Unavailable"
 
@@ -444,7 +459,7 @@ def is_df(var):
 
 
 #create excel workbook
-workbook = xlsxwriter.Workbook('Output_' + date + '.xlsx')
+workbook = xlsxwriter.Workbook('Output.xlsx')
 
 #add formats
 format_dict = {}
@@ -452,47 +467,54 @@ format_dict = {}
 x = -1
 # create one sheet for each ticker
 for ticker in tickers:
-    #filter out if market cap is over 10B
-    try:
-        print data_dict[tickers[x]][2][1][1]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][0]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][1]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][14]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][16]
-    except:
-        print "Not found"
     x += 1
     workbook.add_worksheet(ticker)
     worksheet = workbook.get_worksheet_by_name(ticker)
-    worksheet.set_column('A:G', 20)
     # write to each sheet
     worksheet.write('B1', "Company Name")
     worksheet.write('C1', data_dict[tickers[x]][0])
     worksheet.write('B2', "Current Price")
     worksheet.write('C2', data_dict[tickers[x]][1])
     worksheet.write('B4',data_dict[tickers[x]][2][0])
-    worksheet.set_column(0, None, None, {'hidden': True}) #not working
+    #worksheet.write('E1', pd.DataFrame(data_dict[tickers[x]][2][1]))
+    #adjust column width
+    worksheet.set_column('A:A', 0)
+    worksheet.set_column('B:G', 20)
+    worksheet.write('D12','=LEFT(C12,FIND("-",C12)-2)')
+    worksheet.write('E12','=TRIM(RIGHT(C12,FIND("-",C12)-1))')
+    worksheet.write('K2', '=LEFT(C1,FIND("(",C1) - 2)')
+    worksheet.write('D1','=TRIM(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("PLC",UPPER(LEFT(C1,FIND("(",C1) - 2))),3,"" ), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND(", INC.",UPPER(LEFT(C1,FIND("(",C1) - 2))),6,"" )), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORPORATION",UPPER(LEFT(C1,FIND("(",C1) - 2))),11,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORP.",UPPER(LEFT(C1,FIND("(",C1) - 2))),5,"" )), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("COMPANY",UPPER(LEFT(C1,FIND("(",C1) - 2))),7,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("INC.",UPPER(LEFT(C1,FIND("(",C1) - 2))),4,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORP",UPPER(LEFT(C1,FIND("(",C1) - 2))),4,"" )),LEFT(C1,FIND("(",C1) - 2)))')
+    worksheet.write('K3', '=" is scheduled to report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+    worksheet.write('K4', '="The stock is currently trading at " & TEXT(C2,"$####.00") & ", " & IF(C2-C7=0, "at the same price" & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")), IF(C2-C7>0, "up " & TEXT((C7-C2)/C7*-1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")), "down " & TEXT((C7-C2)/C7*1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")) ))')
+    worksheet.write('K5', '="The one year target estimate for " & D1 & " is " & TEXT(C23,"$####.00")')
+    worksheet.write('K6', '=" which would be " & IF(OR(LEFT(ABS((C23-C2)/C2*100),1)="8",LEFT(ABS((C23-C2)/C2*100),2)="18"), "an ", "a ")  &TEXT(ABS((C23-C2)/C2),"####.00%")&IF((C23-C2)>0," increase over"," decrease from")&" the current price"')
+    worksheet.write('K7', '="Earnings are expected to " & IF(C28=D28, "remain constant over the next quarter", IF( D28>C28,  "increase by " & TEXT((D28-C28)/C28*100,"##.##") & "% over last quarter", "decrease by " & TEXT((D28-C28)/C28*-100,"##.##") & "% from last quarter")) & " based on the average of " & $C$27 & " analyst estimates (Yahoo Finance)"')
+    worksheet.write('K8', '=IF(VALUE(C2)=D12, "The stock is trading at an all-time low",IF(VALUE(C2) =E12,"The stock is trading at an all-time high",IF(VALUE(C2)<D12+(E12-D12)/3, "The stock is trading in the low end of its 52-week range",IF(VALUE(C2)<D12+2*(E12-D12)/3, "The stock is trading near the middle of its 52 week range", "The stock is trading in the high end of its 52-week range"))) )')
+    worksheet.write('K9', '="Over the last 4 quarters, we\'ve seen a positive earnings surprise " & 4 -COUNTIF(C45:F45,"-*") & IF(4 - COUNTIF(C45:F45,"-*")=1, " time,"," times,") & " and a negative earnings surprise " & COUNTIF(C45:F45,"-*") & IF(COUNTIF(C45:F45,"-*")=1, " time", " times")')
+    #Paragraph 1
+    worksheet.write('K17','=K2 & K3 & ". " & K4 & ". " & K5 & K6 & ". " & K7 & ". " & K8 & ". " & K9 & "."')
+
+    #converts financial statement text into numbers
+    for y in range(140,400):
+        worksheet.write('J' + str(y), '=IF(TRIM(C' + str(y) + ')="-", "N/A", IF(RIGHT(C' + str(y) + ',1)="M",1000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="B",1000000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="%",0.01*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),C' + str(y) + '))))')
+        worksheet.write('K' + str(y), '=IF(TRIM(D' + str(y) + ')="-", "N/A", IF(RIGHT(D' + str(y) + ',1)="M",1000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="B",1000000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="%",0.01*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),D' + str(y) + '))))')
+        worksheet.write('L' + str(y), '=IF(TRIM(E' + str(y) + ')="-", "N/A", IF(RIGHT(E' + str(y) + ',1)="M",1000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="B",1000000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="%",0.01*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),E' + str(y) + '))))')
+        worksheet.write('M' + str(y), '=IF(TRIM(F' + str(y) + ')="-", "N/A", IF(RIGHT(F' + str(y) + ',1)="M",1000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="B",1000000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="%",0.01*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),F' + str(y) + '))))')
+        worksheet.write('N' + str(y), '=IF(TRIM(G' + str(y) + ')="-", "N/A", IF(RIGHT(G' + str(y) + ',1)="M",1000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="B",1000000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="%",0.01*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),G' + str(y) + '))))')
+
+
+        #worksheet.write('J100:N400','=IF(TRIM(C147)="-", "N/A", IF(RIGHT(C147,1)="M",1000000*VALUE(LEFT(C147,LEN(C147)-1)),IF(RIGHT(C147,1)="B",1000000000*VALUE(LEFT(C147,LEN(C147)-1)),IF(RIGHT(C147,1)="%",0.01*VALUE(LEFT(C147,LEN(C147)-1)),C147))))')
+
+
+
+    #additons
+    #=IF(STDEV.P(J146:N146)<0.1,IF(COUNTIF(J146:N146,">0")=5,"pos_trend"),"") where J146:N146 is a range of annual data
+        # checks if the data isn't deviating too much, and if it isn't, whether there is a positive trend
 
 workbook.close()
 
-writer = pd.ExcelWriter('Output_' + date + '.xlsx', engine='openpyxl')
-wb = load_workbook('Output_' + date + '.xlsx')
+writer = pd.ExcelWriter('Output.xlsx', engine='openpyxl')
+wb = load_workbook('Output.xlsx')
 
 # create pandas excel writer for dfs
 writer.book = wb
@@ -504,8 +526,7 @@ writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
 
 x = -1
 for ticker in tickers:
-    worksheet = writer.sheets[ticker]
-    offset = 4
+    offset = 6
     x += 1
 
     try:
@@ -557,82 +578,70 @@ for ticker in tickers:
     try:
         df = pd.DataFrame(data_dict[tickers[x]][9])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 3
+        offset += len(df.index) + 2
     except:
         print "pd.DataFrame(data_dict[tickers[x]][9])"
 
     try:
-        worksheet.write(offset, 1, data_dict[tickers[x]][11])
-        offset += 2
-    except:
-        print "data_dict[tickers[x]][11]"
-
-    try:
         df = pd.DataFrame(data_dict[tickers[x]][12][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][12][0])"
 
     try:
-        worksheet.write(offset, 1, data_dict[tickers[x]][13])
-        offset += 2
-    except:
-        print "data_dict[tickers[x]][13]"
-
-    try:
         df = pd.DataFrame(data_dict[tickers[x]][14][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][14][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][16][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][16][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][18][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][18][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][20][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][20][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][22][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][22][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][24][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][24][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][26][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][26][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][28][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][28][0])"
 
@@ -739,9 +748,136 @@ for ticker in tickers:
                 print "pd.DataFrame(data_dict[tickers[x]][53][0])"
     except:
         print "index 44 out of range"
+
+    # #Company Bio
+    # worksheet = writer.sheets[ticker]
+    # try:
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][33][0])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][33][1])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][33][2])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][33][3])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][33][4])
+    #     offset += 1
+    # except:
+    #     print 'not printed'
+    #
+    # try:
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][34][0])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][34][1])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][34][2])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][34][3])
+    #     offset += 1
+    # except:
+    #     print 'not printed'
+    #
+    # try:
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][35][0])
+    #     offset += 1
+    #     worksheet.write_string(offset, 1, data_dict[tickers[x]][35][1])
+    #     offset += 1
+    # except:
+    #     print 'not printed'
+
+    # try:
+    #     df = data_dict[tickers[x]][33][0]
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][0])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][33][1])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][1])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][33][2])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][2])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][33][3])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][3])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][33][4])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][4])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][34][0])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][34][0])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][34][1])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][34][1])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][34][2])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][34][2])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][34][3])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][34][3])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][35][0])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][35][0])"
+    #
+    # try:
+    #     df = pd.DataFrame(data_dict[tickers[x]][35][1])
+    #     df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+    #     offset += len(df.index) + 1
+    # except:
+    #     print "pd.DataFrame(data_dict[tickers[x]][33][0])"
+
+
+
+
+
+
+
+
+
+
 writer.save()
 
-#if entire tables are empty, don't print them
+
+
+
+
+
 
 
 

@@ -35,6 +35,29 @@ d_valid = True
 start_time = time.time()
 time_one = time.time() #----------------------------------------------------------------------------------------------------------------------
 
+# def prettier_print(leabhar, tickers):
+    # for ticker in tickers:
+    #     for x in range(0,1000): #try and go that high, you won't
+    #         try:
+    #             for y in range(0,1000): #i dare you
+    #                     try:
+    #                         for z in range(0,1000):
+    #                             if isinstance(data_dict[tickers[x]][y][z], str):
+    #                                 try:
+    #                                     print (tabulate(data_dict[tickers[x]][y], headers='keys', tablefmt='psql'))
+    #
+    #                                 except:
+    #                                     print (tabulate(data_dict[tickers[x]][y][z], headers='keys', tablefmt='psql'))
+    #
+    #
+    #         except:
+    #             break
+    #
+    #
+    #         if data_dict[tickers[x]][12][0])
+
+
+
 def pretty_print(table_title, table_to_print):
     df = pd.read_html(str(table_to_print))
     print table_title, "\n", (tabulate(df[0], headers='keys', tablefmt='psql'))
@@ -130,22 +153,6 @@ for ticker_url in ticker_urls:
         #print "Current Price: " + cur_price.get_text()
         #pretty_print("Summary", summary_table)
         data_dict[tickers[x]].extend((c_name.get_text(),cur_price.get_text(),("Summary",pd.read_html(str(summary_table)))))
-
-        #remove companies with a market cap over 10B
-        market_cap = 0
-        market_caps = summary_table[1].find_all('tr')
-        market_cap_string = market_caps[0].get_text()[10:]
-
-        if market_cap_string[-1:] == 'M':
-            market_cap = float(market_cap_string[:-1]) * 1000000
-        elif market_cap_string[-1:] == 'B':
-            market_cap = float(market_cap_string[:-1]) * 1000000000
-
-        if market_cap > 10000000000:
-            data_dict = removekey(data_dict, tickers[x])
-            tickers.remove(tickers[x])
-            x -= 1
-            continue
 
     except:
         #print "Stock Quote Unavailable"
@@ -276,7 +283,20 @@ for ticker_url in ticker_urls:
         geo_con_web = replace_with_newlines(soup.find('p', ['class', 'D(ib) W(47.727%) Pend(40px)']))
         sec_ind_emp = replace_with_newlines(soup.find('p', ['class', 'D(ib) Va(t)']))
         execs_table = soup.find_all('table', ['class', 'W(100%)'])
+        #execs = execs_table[0].findChildren()
         descript = replace_with_newlines(soup.find('p',['class','Mt(15px) Lh(1.6)']))
+
+        text = descript
+
+        from pycorenlp import StanfordCoreNLP
+
+        nlp = StanfordCoreNLP('http://localhost:9000')
+        output = nlp.annotate(text, properties={
+            'annotators': 'tokenize,ssplit,pos,depparse,parse',
+            'outputFormat': 'json'
+        })
+        print output['sentences'][0]['parse']
+
 
         #print c_name.get_text()
         #pretty_print("Executives", execs_table)
@@ -428,7 +448,20 @@ time_nine = time.time() #-------------------------------------------------------
 print time_two - time_one, time_three - time_two, time_four - time_three, time_five - time_four, time_six - time_five, time_seven - time_six, time_eight - time_seven, time_nine - time_eight
 print data_dict
 
-x = 0
+#Test querying the dicitonary
+
+#Test 3
+# try:
+#     print "test3 - Summary with data table", data_dict[tickers[x]][2]
+# except:
+#     pass
+#
+# #Test 4
+# try:
+#     print "test3 - 'Summary'", pd.DataFrame(data_dict[tickers[x]][2][1])
+# except:
+#     pass
+
 
 #Look into "Stock Financials Unavailable"
 
@@ -444,55 +477,43 @@ def is_df(var):
 
 
 #create excel workbook
-workbook = xlsxwriter.Workbook('Output_' + date + '.xlsx')
+workbook = xlsxwriter.Workbook('Output.xlsx')
 
 #add formats
 format_dict = {}
+format = workbook.add_format()
+
+format.set_align('center')
+format.set_align('vcenter')
 
 x = -1
+
 # create one sheet for each ticker
 for ticker in tickers:
-    #filter out if market cap is over 10B
-    try:
-        print data_dict[tickers[x]][2][1][1]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][0]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][1]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][14]
-    except:
-        print "Not found"
-
-    try:
-        print data_dict[tickers[x]][2][1][1][16]
-    except:
-        print "Not found"
     x += 1
     workbook.add_worksheet(ticker)
     worksheet = workbook.get_worksheet_by_name(ticker)
-    worksheet.set_column('A:G', 20)
+
+    worksheet.set_column('A:A', 30)
+    worksheet.set_column('B:B', 480)
+    worksheet.set_column('C:C', 350)
+    worksheet.set_column('D:D', 150)
+    worksheet.set_column('E:E', 150)
+    worksheet.set_column('F:F', 150)
+    worksheet.set_column('G:G', 150)
+
     # write to each sheet
-    worksheet.write('B1', "Company Name")
-    worksheet.write('C1', data_dict[tickers[x]][0])
-    worksheet.write('B2', "Current Price")
-    worksheet.write('C2', data_dict[tickers[x]][1])
-    worksheet.write('B4',data_dict[tickers[x]][2][0])
-    worksheet.set_column(0, None, None, {'hidden': True}) #not working
+    worksheet.write('A1', "Company Name")
+    worksheet.write('B1', data_dict[tickers[x]][0])
+    worksheet.write('A2', "Current Price")
+    worksheet.write('B2', data_dict[tickers[x]][1])
+    worksheet.write('A4',data_dict[tickers[x]][2][0])
+    #worksheet.write('E1', pd.DataFrame(data_dict[tickers[x]][2][1]))
 
 workbook.close()
 
-writer = pd.ExcelWriter('Output_' + date + '.xlsx', engine='openpyxl')
-wb = load_workbook('Output_' + date + '.xlsx')
+writer = pd.ExcelWriter('Output.xlsx', engine='openpyxl')
+wb = load_workbook('Output.xlsx')
 
 # create pandas excel writer for dfs
 writer.book = wb
@@ -504,170 +525,157 @@ writer.sheets = dict((ws.title, ws) for ws in wb.worksheets)
 
 x = -1
 for ticker in tickers:
-    worksheet = writer.sheets[ticker]
-    offset = 4
+    offset = 6
     x += 1
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][2][1][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
         offset += len(df.index) + 1
 
         df = pd.DataFrame(data_dict[tickers[x]][2][1][1])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         pass
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][4])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][4])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][5])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][5])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][6])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][6])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][7])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][7])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][8])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][8])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][9])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 3
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][9])"
 
     try:
-        worksheet.write(offset, 1, data_dict[tickers[x]][11])
-        offset += 2
-    except:
-        print "data_dict[tickers[x]][11]"
-
-    try:
         df = pd.DataFrame(data_dict[tickers[x]][12][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][12][0])"
 
     try:
-        worksheet.write(offset, 1, data_dict[tickers[x]][13])
-        offset += 2
-    except:
-        print "data_dict[tickers[x]][13]"
-
-    try:
         df = pd.DataFrame(data_dict[tickers[x]][14][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][14][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][16][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][16][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][18][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][18][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][20][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][20][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][22][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][22][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][24][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][24][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][26][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][26][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][28][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][28][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][30][0])
-        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=False)
-        offset += len(df.index) + 2
+        df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
+        offset += len(df.index) + 1
     except:
         print "pd.DataFrame(data_dict[tickers[x]][30][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][32][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print ticker, "pd.DataFrame(data_dict[tickers[x]][32][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][38][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print ticker, "pd.DataFrame(data_dict[tickers[x]][38][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][39][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print ticker, "pd.DataFrame(data_dict[tickers[x]][39][0])"
 
     try:
         df = pd.DataFrame(data_dict[tickers[x]][43][0])
         df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-        offset += len(df.index) + 2
+        offset += len(df.index) + 1
     except:
         print ticker, "pd.DataFrame(data_dict[tickers[x]][43][0])"
 
@@ -677,35 +685,35 @@ for ticker in tickers:
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][44][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print "pd.DataFrame(data_dict[tickers[x]][44][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][46][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print ticker, "pd.DataFrame(data_dict[tickers[x]][46][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][50][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print ticker, "pd.DataFrame(data_dict[tickers[x]][50][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][52][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print "pd.DataFrame(data_dict[tickers[x]][52][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][54][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print ticker, "pd.DataFrame(data_dict[tickers[x]][54][0])"
 
@@ -713,42 +721,47 @@ for ticker in tickers:
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][45][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print "pd.DataFrame(data_dict[tickers[x]][45][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][47][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print ticker, "pd.DataFrame(data_dict[tickers[x]][47][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][51][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print ticker, "pd.DataFrame(data_dict[tickers[x]][51][0])"
 
             try:
                 df = pd.DataFrame(data_dict[tickers[x]][53][0])
                 df.to_excel(writer, sheet_name=ticker, startrow=offset, header=True)
-                offset += len(df.index) + 2
+                offset += len(df.index) + 1
             except:
                 print "pd.DataFrame(data_dict[tickers[x]][53][0])"
     except:
         print "index 44 out of range"
 writer.save()
 
-#if entire tables are empty, don't print them
 
-
-
-
-
-
-
+#
+# format = workbook.add_format()
+#
+# format.set_align('center')
+# format.set_align('vcenter')
+#
+# worksheet.set_row(0, 70)
+# worksheet.set_column('A:A', 30)
+#
+# worksheet.write(0, 0, 'Some Text', format)
+#
+#
 
 
 
