@@ -54,7 +54,7 @@ def removekey(d, key):
     del r[key]
     return r
 
-date = "2017-07-20"
+date = "2017-07-24"
 
 url = "finance.yahoo.com/calendar/earnings?day=" + date
 r  = requests.get("https://" + url)
@@ -498,6 +498,9 @@ def is_df(var):
 #create excel workbook
 workbook = xlsxwriter.Workbook('Output.xlsx')
 
+#Create output sheet
+workbook.add_worksheet("Output Text")
+
 #add formats
 format_dict = {}
 
@@ -530,25 +533,53 @@ for ticker in tickers:
     worksheet.write('E12','=TRIM(RIGHT(C12,FIND("-",C12)-1))')
     worksheet.write('K2', '=LEFT(C1,FIND("(",C1) - 2)')
     worksheet.write('D1','=TRIM(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(IFERROR(REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("PLC",UPPER(LEFT(C1,FIND("(",C1) - 2))),3,"" ), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND(", INC.",UPPER(LEFT(C1,FIND("(",C1) - 2))),6,"" )), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORPORATION",UPPER(LEFT(C1,FIND("(",C1) - 2))),11,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORP.",UPPER(LEFT(C1,FIND("(",C1) - 2))),5,"" )), REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("COMPANY",UPPER(LEFT(C1,FIND("(",C1) - 2))),7,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("INC.",UPPER(LEFT(C1,FIND("(",C1) - 2))),4,"" )),REPLACE(LEFT(C1,FIND("(",C1) - 2), FIND("CORP",UPPER(LEFT(C1,FIND("(",C1) - 2))),4,"" )),LEFT(C1,FIND("(",C1) - 2)))')
+
     worksheet.write('K3', '=" is scheduled to report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
-    worksheet.write('K4', '="The stock is currently trading at " & TEXT(C2,"$####.00") & ", " & IF(C2-C7=0, "at the same price" & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")), IF(C2-C7>0, "up " & TEXT((C7-C2)/C7*-1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")), "down " & TEXT((C7-C2)/C7*1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down from" & TEXT((C7-C8)/C7*1,"##.##%")) & " yesterday\'s close")) ))')
+    worksheet.write('L3', '=" is slated to report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+    worksheet.write('M3', '=" will report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+    worksheet.write('N3', '=" reports earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+    worksheet.write('O3', '=" plans to report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+    worksheet.write('P3', '=" is going to report earnings "&IFERROR("between "&LEFT(C20,FIND("-",C20)-2)&" and "&RIGHT(C20,FIND("-",C20)-2),"on "&C20)')
+
+    worksheet.write('K4', '="The stock is currently trading at " & TEXT(C2,"$####.00") & ", " & IF(C2-C7=0, "at the same price" & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s close")), IF(C2-C7>0, "up " & TEXT((C7-C2)/C7*-1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s close")), "down " & TEXT((C7-C2)/C7*1,"##.##%") & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s close", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "slightly", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s close", IF((C7-C8)/C7 <0.01, "slightly below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s close")) ))')
+    worksheet.write('L4', '="The current stock price is " & TEXT(C2,"$####.00") & ", " & IF(C2-C7=0, "at the same price" & " after opening " & IF(C8-C7=0, "at the same price as yesterday\'s closing price", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "a fraction", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s closing price", IF((C7-C8)/C7 <0.01, "a bit below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s closing price")), IF(C2-C7>0, "up " & TEXT((C7-C2)/C7*-1,"##.##%") & " after opening " & IF(C8-C7=0, "at yesterday\'s closing price", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "a fraction", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s closing price", IF((C7-C8)/C7 <0.01, "a bit below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s closing price")), "down " & TEXT((C7-C2)/C7*1,"##.##%") & " after opening " & IF(C8-C7=0, "at yesterday\'s closing price", IF(C8-C7>0, "up " & IF((C7-C8)/C7*-1 <0.01, "a fraction", TEXT((C7-C8)/C7*-1,"##.##%")) & " over yesterday\'s closing price", IF((C7-C8)/C7 <0.01, "a bit below", "down " & TEXT((C7-C8)/C7*1,"##.##%") & " from") & " yesterday\'s closing price")) ))')
+
     worksheet.write('K5', '="The one year target estimate for " & D1 & " is " & TEXT(C23,"$####.00")')
+    worksheet.write('L5', '=D1 &" has a one year target estimate of " & TEXT(C23,"$####.00")')
+    worksheet.write('L5', '=D1 & " is expected to be trading at " & TEXT(C23, "$####.00") & ", based on target estimates"')
+
     worksheet.write('K6', '=" which would be " & IF(OR(LEFT(ABS((C23-C2)/C2*100),1)="8",LEFT(ABS((C23-C2)/C2*100),2)="18"), "an ", "a ")  &TEXT(ABS((C23-C2)/C2),"####.00%")&IF((C23-C2)>0," increase over"," decrease from")&" the current price"')
     worksheet.write('K7', '="Earnings are expected to " & IF(C28=D28, "remain constant over the next quarter", IF( D28>C28,  "increase by " & TEXT((D28-C28)/C28*100,"##.##") & "% over last quarter", "decrease by " & TEXT((D28-C28)/C28*-100,"##.##") & "% from last quarter")) & " based on the average of " & $C$27 & " analyst estimates (Yahoo Finance)"')
     worksheet.write('K8', '=IF(VALUE(C2)=D12, "The stock is trading at an all-time low",IF(VALUE(C2) =E12,"The stock is trading at an all-time high",IF(VALUE(C2)<D12+(E12-D12)/3, "The stock is trading in the low end of its 52-week range",IF(VALUE(C2)<D12+2*(E12-D12)/3, "The stock is trading near the middle of its 52 week range", "The stock is trading in the high end of its 52-week range"))) )')
+
     worksheet.write('K9', '="Over the last 4 quarters, we\'ve seen a positive earnings surprise " & 4 -COUNTIF(C45:F45,"-*") & IF(4 - COUNTIF(C45:F45,"-*")=1, " time,"," times,") & " and a negative earnings surprise " & COUNTIF(C45:F45,"-*") & IF(COUNTIF(C45:F45,"-*")=1, " time", " times")')
+    worksheet.write('K9', '="Over the last 4 quarters, there" & IF(4 - COUNTIF(C45:F45,"-*")=1, " has"," have") & " been" & IF(4 - COUNTIF(C45:F45,"-*")=1, " a,","") & " positive earnings surprise" & IF(4 - COUNTIF(C45:F45,"-*")=1, " ","s ") & 4 -COUNTIF(C45:F45,"-*") & IF(4 - COUNTIF(C45:F45,"-*")=1, " time,"," times,") & " and a negative earnings surprise " & COUNTIF(C45:F45,"-*") & IF(COUNTIF(C45:F45,"-*")=1, " time", " times")')
+
     worksheet.write('K10','=IF(F48=F52,"",IF(F48>F52, "EPS estimates have increased by " & TEXT(F48-F52,"$0.00") & " in the 2 months leading up to the earnings report", "EPS estimates have decreased by " & TEXT(ABS(F48-F52),"$0.00") & " in the 2 months leading up to the earnings report"))')
-    worksheet.write('K11','=K42')
+    worksheet.write('K11','=IF(B145="Interest Income",U42, K42)')
+
+    worksheet.write('J3','=RANDBETWEEN(1,6)')
+    worksheet.write('J4','=RANDBETWEEN(1,2)')
+    worksheet.write('J5','=RANDBETWEEN(1,2)')
+
     #Paragraph 1
-    worksheet.write('K17','=K2 & K3 & ". " & K4 & ". " & K5 & K6 & ". " & K7 & ". " & K8 & ". " & K9 & "."')
+    worksheet.write('K17','=K2 & IF(J3=1, K3,IF(J3=2,L3,IF(J3=3,M3,IF(J3=4,N3,IF(J3=5,O3,IF(J3=6,P3)))))) & ". " & IF(J4=1,K4,IF(J4=2,L4)) & ". " & IF(J5=1,K5,IF(J5=2,L5)) & K6 & ". " & K7 & ". " & K8 & ". " & K9 & "."')
 
     #converts financial statement text into numbers
     for y in range(60,400):
-        worksheet.write('J' + str(y), '=IF(TRIM(C' + str(y) + ')="-", "N/A", IF(RIGHT(C' + str(y) + ',1)="M",1000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="B",1000000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="%",0.01*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),C' + str(y) + '))))')
-        worksheet.write('K' + str(y), '=IF(TRIM(D' + str(y) + ')="-", "N/A", IF(RIGHT(D' + str(y) + ',1)="M",1000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="B",1000000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="%",0.01*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),D' + str(y) + '))))')
-        worksheet.write('L' + str(y), '=IF(TRIM(E' + str(y) + ')="-", "N/A", IF(RIGHT(E' + str(y) + ',1)="M",1000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="B",1000000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="%",0.01*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),E' + str(y) + '))))')
-        worksheet.write('M' + str(y), '=IF(TRIM(F' + str(y) + ')="-", "N/A", IF(RIGHT(F' + str(y) + ',1)="M",1000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="B",1000000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="%",0.01*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),F' + str(y) + '))))')
-        worksheet.write('N' + str(y), '=IF(TRIM(G' + str(y) + ')="-", "N/A", IF(RIGHT(G' + str(y) + ',1)="M",1000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="B",1000000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="%",0.01*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),G' + str(y) + '))))')
+        #worksheet.write('J' + str(y), '=IF(TRIM(C' + str(y) + ')="-", "N/A", IF(RIGHT(C' + str(y) + ',1)="M",1000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="B",1000000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="%",0.01*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),C' + str(y) + '))))')
+        #worksheet.write('K' + str(y), '=IF(TRIM(D' + str(y) + ')="-", "N/A", IF(RIGHT(D' + str(y) + ',1)="M",1000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="B",1000000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="%",0.01*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),D' + str(y) + '))))')
+        #worksheet.write('L' + str(y), '=IF(TRIM(E' + str(y) + ')="-", "N/A", IF(RIGHT(E' + str(y) + ',1)="M",1000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="B",1000000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="%",0.01*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),E' + str(y) + '))))')
+        #worksheet.write('M' + str(y), '=IF(TRIM(F' + str(y) + ')="-", "N/A", IF(RIGHT(F' + str(y) + ',1)="M",1000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="B",1000000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="%",0.01*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),F' + str(y) + '))))')
+        #worksheet.write('N' + str(y), '=IF(TRIM(G' + str(y) + ')="-", "N/A", IF(RIGHT(G' + str(y) + ',1)="M",1000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="B",1000000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="%",0.01*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),G' + str(y) + '))))')
+
+        #bug fix
+        worksheet.write('J' + str(y), '=IFERROR(IF(TRIM(C' + str(y) + ')="-", "N/A", IF(RIGHT(C' + str(y) + ',1)=")",IF(RIGHT(C' + str(y) + ',2)="T)",-1000000000000*VALUE(MID(C' + str(y) + ',2,LEN(C' + str(y) + ')-3)),IF(RIGHT(C' + str(y) + ',2)="M)",-1000000*VALUE(MID(C' + str(y) + ',2,LEN(C' + str(y) + ')-3)),IF(RIGHT(C' + str(y) + ',2)="B)",-1000000000*VALUE(MID(C' + str(y) + ',2,LEN(C' + str(y) + ')-3)),IF(RIGHT(C' + str(y) + ',2)="k)",-1000*VALUE(MID(C' + str(y) + ',2,LEN(C' + str(y) + ')-3)),VALUE(SUBSTITUTE(C' + str(y) + ',",","")))))),IF(RIGHT(C' + str(y) + ',1)="T",1000000000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="M",1000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="B",1000000000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="%",0.01*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),IF(RIGHT(C' + str(y) + ',1)="k",1000*VALUE(LEFT(C' + str(y) + ',LEN(C' + str(y) + ')-1)),VALUE(SUBSTITUTE(C' + str(y) + ',",",""))))))))),"N/A")')
+        worksheet.write('K' + str(y), '=IFERROR(IF(TRIM(D' + str(y) + ')="-", "N/A", IF(RIGHT(D' + str(y) + ',1)=")",IF(RIGHT(D' + str(y) + ',2)="T)",-1000000000000*VALUE(MID(D' + str(y) + ',2,LEN(D' + str(y) + ')-3)),IF(RIGHT(D' + str(y) + ',2)="M)",-1000000*VALUE(MID(D' + str(y) + ',2,LEN(D' + str(y) + ')-3)),IF(RIGHT(D' + str(y) + ',2)="B)",-1000000000*VALUE(MID(D' + str(y) + ',2,LEN(D' + str(y) + ')-3)),IF(RIGHT(D' + str(y) + ',2)="k)",-1000*VALUE(MID(D' + str(y) + ',2,LEN(D' + str(y) + ')-3)),VALUE(SUBSTITUTE(D' + str(y) + ',",","")))))),IF(RIGHT(D' + str(y) + ',1)="T",1000000000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="M",1000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="B",1000000000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="%",0.01*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),IF(RIGHT(D' + str(y) + ',1)="k",1000*VALUE(LEFT(D' + str(y) + ',LEN(D' + str(y) + ')-1)),VALUE(SUBSTITUTE(D' + str(y) + ',",",""))))))))),"N/A")')
+        worksheet.write('L' + str(y), '=IFERROR(IF(TRIM(E' + str(y) + ')="-", "N/A", IF(RIGHT(E' + str(y) + ',1)=")",IF(RIGHT(E' + str(y) + ',2)="T)",-1000000000000*VALUE(MID(E' + str(y) + ',2,LEN(E' + str(y) + ')-3)),IF(RIGHT(E' + str(y) + ',2)="M)",-1000000*VALUE(MID(E' + str(y) + ',2,LEN(E' + str(y) + ')-3)),IF(RIGHT(E' + str(y) + ',2)="B)",-1000000000*VALUE(MID(E' + str(y) + ',2,LEN(E' + str(y) + ')-3)),IF(RIGHT(E' + str(y) + ',2)="k)",-1000*VALUE(MID(E' + str(y) + ',2,LEN(E' + str(y) + ')-3)),VALUE(SUBSTITUTE(E' + str(y) + ',",","")))))),IF(RIGHT(E' + str(y) + ',1)="T",1000000000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="M",1000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="B",1000000000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="%",0.01*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),IF(RIGHT(E' + str(y) + ',1)="k",1000*VALUE(LEFT(E' + str(y) + ',LEN(E' + str(y) + ')-1)),VALUE(SUBSTITUTE(E' + str(y) + ',",",""))))))))),"N/A")')
+        worksheet.write('M' + str(y), '=IFERROR(IF(TRIM(F' + str(y) + ')="-", "N/A", IF(RIGHT(F' + str(y) + ',1)=")",IF(RIGHT(F' + str(y) + ',2)="T)",-1000000000000*VALUE(MID(F' + str(y) + ',2,LEN(F' + str(y) + ')-3)),IF(RIGHT(F' + str(y) + ',2)="M)",-1000000*VALUE(MID(F' + str(y) + ',2,LEN(F' + str(y) + ')-3)),IF(RIGHT(F' + str(y) + ',2)="B)",-1000000000*VALUE(MID(F' + str(y) + ',2,LEN(F' + str(y) + ')-3)),IF(RIGHT(F' + str(y) + ',2)="k)",-1000*VALUE(MID(F' + str(y) + ',2,LEN(F' + str(y) + ')-3)),VALUE(SUBSTITUTE(F' + str(y) + ',",","")))))),IF(RIGHT(F' + str(y) + ',1)="T",1000000000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="M",1000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="B",1000000000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="%",0.01*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),IF(RIGHT(F' + str(y) + ',1)="k",1000*VALUE(LEFT(F' + str(y) + ',LEN(F' + str(y) + ')-1)),VALUE(SUBSTITUTE(F' + str(y) + ',",",""))))))))),"N/A")')
+        worksheet.write('N' + str(y), '=IFERROR(IF(TRIM(G' + str(y) + ')="-", "N/A", IF(RIGHT(G' + str(y) + ',1)=")",IF(RIGHT(G' + str(y) + ',2)="T)",-1000000000000*VALUE(MID(G' + str(y) + ',2,LEN(G' + str(y) + ')-3)),IF(RIGHT(G' + str(y) + ',2)="M)",-1000000*VALUE(MID(G' + str(y) + ',2,LEN(G' + str(y) + ')-3)),IF(RIGHT(G' + str(y) + ',2)="B)",-1000000000*VALUE(MID(G' + str(y) + ',2,LEN(G' + str(y) + ')-3)),IF(RIGHT(G' + str(y) + ',2)="k)",-1000*VALUE(MID(G' + str(y) + ',2,LEN(G' + str(y) + ')-3)),VALUE(SUBSTITUTE(G' + str(y) + ',",","")))))),IF(RIGHT(G' + str(y) + ',1)="T",1000000000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="M",1000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="B",1000000000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="%",0.01*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),IF(RIGHT(G' + str(y) + ',1)="k",1000*VALUE(LEFT(G' + str(y) + ',LEN(G' + str(y) + ')-1)),VALUE(SUBSTITUTE(G' + str(y) + ',",",""))))))))),"N/A")')
+
         worksheet.write('I' + str(y), '=IF(AND(K' + str(y) + '> J' + str(y)+ ', L' + str(y) + '> K' +str(y)+ ', M' + str(y) + '> L' +str(y)+ ', N' + str(y) +'> M' + str(y) + '), "pos_trend", IF(AND(K' + str(y) +'< J' +str(y)+ ', L' + str(y) +'< K' +str(y)+ ', M' + str(y) +'< L' +str(y)+ ', N' + str(y) + '< M' + str(y) + '), "neg_trend", "N/A"))')
 
     #trend analysis
@@ -557,6 +588,11 @@ for ticker in tickers:
         worksheet.write('L' + str(row), '=IF(EXACT(K' + str(row) + ',UPPER(K' + str(row) + ')),K' + str(row) + ',LOWER(K' + str(row) + '))')
         worksheet.write('M22', '=L22')
         worksheet.write('M' + str(row + 1), '=IF(L' + str(row + 1) + '<>"", M' + str(row) + ' & ", " & L' + str(row + 1) + ',M' + str(row) + ')')
+        #bank version
+        worksheet.write('T' + str(row), '=IF(U' + str(row) + ' <> "",' + str(row - 21) + ', 0)')
+        worksheet.write('V' + str(row), '=IF(EXACT(U' + str(row) + ',UPPER(U' + str(row) + ')),U' + str(row) + ',LOWER(U' + str(row) + '))')
+        worksheet.write('W22', '=V22')
+        worksheet.write('W' + str(row + 1), '=IF(V' + str(row + 1) + '<>"", W' + str(row) + ' & ", " & V' + str(row + 1) + ',W' + str(row) + ')')
 
     worksheet.write('K22', '=IF(I145="pos_trend","Revenue","")')
     worksheet.write('K23', '=IF(I146="pos_trend",B146,"")')
@@ -576,11 +612,35 @@ for ticker in tickers:
     worksheet.write('K37', '=IF(I203="pos_trend",B203,"")')
     worksheet.write('K38', '=IF(I351="pos_trend",B351,"")')
     worksheet.write('K39', '=IF(I352="pos_trend",B352,"")')
-    worksheet.write('K40', '=VLOOKUP(J40,J22:K39,2)')
-    worksheet.write('K42', '=IF(M40<>"", D1 & " has managed to increase " & M40 & " each year since " & C144, "No positive trends")')
+    worksheet.write('K40', '=VLOOKUP(J40,J22:K39,2,FALSE)')
+    worksheet.write('K42', '=SUBSTITUTE(IF(M40<>"", D1 & " has managed to increase " & M40 & " each year since " & C144, "No positive trends")," , "," ")')
 
     worksheet.write('J40', '=MAX(J22:J39)')
-    worksheet.write('M40', '=SUBSTITUTE(M39,K40, "and " & K40)')
+    worksheet.write('M40', '=IF(IFERROR(FIND(",",M39),TRUE)=TRUE,M39,IF(NOT(EXACT(K40,UPPER(K40))),SUBSTITUTE(M39,LOWER(K40),"and "&LOWER(K40)),SUBSTITUTE(M39,K40,"and "&K40)))')
+
+    #bank version
+    worksheet.write('U22', '=IF(AND(B145 = "Interest Income",I145="pos_trend"), "Interest Income","")')
+    worksheet.write('U23', '=IF(I151="pos_trend",B151,"")')
+    worksheet.write('U24', '=IF(I161="pos_trend",B161,"")')
+    worksheet.write('U25', '=IF(I162="pos_trend",B162,"")')
+    worksheet.write('U26', '=IF(I167="pos_trend",B167,"")')
+    worksheet.write('U27', '=IF(I170="pos_trend",B170,"")')
+    worksheet.write('U28', '=IF(I171="pos_trend",B171,"")')
+    worksheet.write('U29', '=IF(I172="pos_trend",B172,"")')
+    worksheet.write('U30', '=IF(I178="pos_trend",B178,"")')
+    worksheet.write('U31', '=IF(I199="pos_trend",B199,"")')
+    worksheet.write('U32', '=IF(I209="pos_trend",B209,"")')
+    worksheet.write('U33', '=IF(I231="pos_trend",B231,"")')
+    worksheet.write('U34', '=IF(I251="pos_trend",B251,"")')
+    worksheet.write('U35', '=IF(I279="pos_trend",B279,"")')
+    worksheet.write('U36', '=IF(I336="pos_trend",B336,"")')
+    worksheet.write('U37', '=IF(I235="pos_trend",B235,"")')
+    worksheet.write('U38', '=IF(I236="pos_trend",B236,"")')
+    worksheet.write('U40', '=VLOOKUP(T40,T22:U39,2,FALSE)')
+    worksheet.write('U42', '=SUBSTITUTE(IF(W40<>"", D1 & " has managed to increase " & W40 & " each year since " & C144, "No positive trends")," , "," ")')
+
+    worksheet.write('T40', '=MAX(T22:T39)')
+    worksheet.write('W40', '=IF(IFERROR(FIND(",",W39),TRUE)=TRUE,W39,IF(NOT(EXACT(U40,UPPER(U40))),SUBSTITUTE(W39,LOWER(U40),"and "&LOWER(U40)),SUBSTITUTE(W39,U40,"and "&U40)))')
 
     #for row in range(348,356):
     #    worksheet.write('E' + str(row),'=TRIM(IF(ISNUMBER(VALUE(RIGHT(B'+str(row)+',1))),REPLACE(B'+str(row)+',LEN(B'+str(row)+'),1,""),B'+str(row)+'))')
@@ -659,7 +719,276 @@ for ticker in tickers:
     worksheet.write('G87','=IF(F87<>"", G86 & ", " & IFERROR(LEFT(F87,FIND("(",F87) - 2),F87),G86)')
     worksheet.write('G88','=TRIM(IF(LEFT(G87,1)=",",REPLACE(G87,1,1,""),SUBSTITUTE(G87,F88, "and " & F88)))')
 
-    worksheet.write('D89','=IF(COUNTIF(E81:E87,"=below average")>0,"There are some indications that "&D1&" may be undervalued. The company has a lower" & G88 & " than the comparable average", "Inconclusive")')
+    worksheet.write('D89','=IF(COUNTIF(E70:E76,"=below average")>0,"There are some indications that "&D1&" may be undervalued. The company has a lower " & G88 & " than the comparable average", "Inconclusive")')
+
+
+    #SUPERTREE ------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    worksheet.write('B450', '="ROIC Super Tree"')
+    worksheet.write('D476', '=C144')
+    worksheet.write('E476', '=D144')
+    worksheet.write('F476', '=E144')
+    worksheet.write('G476', '=F144')
+    worksheet.write('H476', '=G144')
+    worksheet.write('D477', '=J467*(1-J487)')
+    worksheet.write('E477', '=K467*(1-K487)')
+    worksheet.write('F477', '=L467*(1-L487)')
+    worksheet.write('G477', '=M467*(1-M487)')
+    worksheet.write('H477', '=N467*(1-N487)')
+    worksheet.write('J466', '=D476')
+    worksheet.write('K466', '=E476')
+    worksheet.write('L466', '=F476')
+    worksheet.write('M466', '=G476')
+    worksheet.write('N466', '=H476')
+    worksheet.write('J467', '=Q462*(1/Q490)')
+    worksheet.write('K467', '=R462*(1/R490)')
+    worksheet.write('L467', '=S462*(1/S490)')
+    worksheet.write('M467', '=T462*(1/T490)')
+    worksheet.write('N467', '=U462*(1/U490)')
+    worksheet.write('K476', '=RIGHT(D476,2) & "-" & RIGHT(E476,2)')
+    worksheet.write('L476', '=RIGHT(E476,2) & "-" & RIGHT(F476,2)')
+    worksheet.write('M476', '=RIGHT(F476,2) & "-" & RIGHT(G476,2)')
+    worksheet.write('N476', '=RIGHT(G476,2) & "-" & RIGHT(H476,2)')
+    worksheet.write('K477', '=E477-D477')
+    worksheet.write('L477', '=F477-E477')
+    worksheet.write('M477', '=G477-F477')
+    worksheet.write('N477', '=H477-G477')
+    worksheet.write('J486', '=D476')
+    worksheet.write('K486', '=E476')
+    worksheet.write('L486', '=F476')
+    worksheet.write('M486', '=G476')
+    worksheet.write('N486', '=H476')
+    worksheet.write('J487',
+                    '=(INDIRECT("J" & MATCH("Income Tax",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Pretax Income",B145:B403,0) +144))')
+    worksheet.write('K487',
+                    '=(INDIRECT("K" & MATCH("Income Tax",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Pretax Income",B145:B403,0) +144))')
+    worksheet.write('L487',
+                    '=(INDIRECT("L" & MATCH("Income Tax",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Pretax Income",B145:B403,0) +144))')
+    worksheet.write('M487',
+                    '=(INDIRECT("M" & MATCH("Income Tax",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Pretax Income",B145:B403,0) +144))')
+    worksheet.write('N487',
+                    '=(INDIRECT("N" & MATCH("Income Tax",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Pretax Income",B145:B403,0) +144))')
+    worksheet.write('Q461', '=D476')
+    worksheet.write('R461', '=E476')
+    worksheet.write('S461', '=F476')
+    worksheet.write('T461', '=G476')
+    worksheet.write('U461', '=H476')
+    worksheet.write('Q462', '=X455-X463-X471')
+    worksheet.write('R462', '=Y455-Y463-Y471')
+    worksheet.write('S462', '=Z455-Z463-Z471')
+    worksheet.write('T462', '=AA455-AA463-AA471')
+    worksheet.write('U462', '=AB455-AB463-AB471')
+    worksheet.write('Q471', '=K476')
+    worksheet.write('R471', '=L476')
+    worksheet.write('S471', '=M476')
+    worksheet.write('T471', '=N476')
+    worksheet.write('Q472', '=K467-J467')
+    worksheet.write('R472', '=L467-K467')
+    worksheet.write('S472', '=M467-L467')
+    worksheet.write('T472', '=N467-M467')
+    worksheet.write('Q480', '=K476')
+    worksheet.write('R480', '=L476')
+    worksheet.write('S480', '=M476')
+    worksheet.write('T480', '=N476')
+    worksheet.write('Q481', '=K487-J487')
+    worksheet.write('R481', '=L487-K487')
+    worksheet.write('S481', '=M487-L487')
+    worksheet.write('T481', '=N487-M487')
+    worksheet.write('Q489', '=D476')
+    worksheet.write('R489', '=E476')
+    worksheet.write('S489', '=F476')
+    worksheet.write('T489', '=G476')
+    worksheet.write('U489', '=H476')
+    worksheet.write('Q490', '=SUM(X483,X491,X499)')
+    worksheet.write('R490', '=SUM(Y483,Y491,Y499)')
+    worksheet.write('S490', '=SUM(Z483,Z491,Z499)')
+    worksheet.write('T490', '=SUM(AA483,AA491,AA499)')
+    worksheet.write('U490', '=SUM(AB483,AB491,AB499)')
+    worksheet.write('AE462', '=K476')
+    worksheet.write('AF462', '=L476')
+    worksheet.write('AG462', '=M476')
+    worksheet.write('AH462', '=N476')
+    worksheet.write('AE463', '=R462-Q462')
+    worksheet.write('AF463', '=S462-R462')
+    worksheet.write('AG463', '=T462-S462')
+    worksheet.write('AH463', '=U462-T462')
+    worksheet.write('AE491', '=K476')
+    worksheet.write('AF491', '=L476')
+    worksheet.write('AG491', '=M476')
+    worksheet.write('AH491', '=N476')
+    worksheet.write('AE492', '=R490-Q490')
+    worksheet.write('AF492', '=S490-R490')
+    worksheet.write('AG492', '=T490-S490')
+    worksheet.write('AH492', '=U490-T490')
+    worksheet.write('X454', '=D476')
+    worksheet.write('Y454', '=E476')
+    worksheet.write('Z454', '=F476')
+    worksheet.write('AA454', '=G476')
+
+
+    # BUG FIX
+    #=IFERROR((INDIRECT("N" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144)), (1 - (INDIRECT("N" & MATCH("Cost of Goods Sold (COGS) incl. D&A",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))))
+    # Uses 1 - Cost of Goods Sold / Sales if Gross Income is unavailable, and Operating Income / Sales otherwise
+
+    worksheet.write('AB454', '=H476')
+    worksheet.write('X455',
+                    '=IFERROR((INDIRECT("J" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144)), IFERROR((1 - (INDIRECT("J" & MATCH("Cost of Goods Sold*",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))),(INDIRECT("J" & MATCH("Operating Income",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))))')
+    worksheet.write('Y455',
+                    '=IFERROR((INDIRECT("K" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144)), IFERROR((1 - (INDIRECT("K" & MATCH("Cost of Goods Sold*",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))),(INDIRECT("K" & MATCH("Operating Income",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))))')
+    worksheet.write('Z455',
+                    '=IFERROR((INDIRECT("L" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144)), IFERROR((1 - (INDIRECT("L" & MATCH("Cost of Goods Sold*",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))),(INDIRECT("L" & MATCH("Operating Income",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))))')
+    worksheet.write('AA455',
+                    '=IFERROR((INDIRECT("M" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144)), IFERROR((1 - (INDIRECT("M" & MATCH("Cost of Goods Sold*",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))),(INDIRECT("M" & MATCH("Operating Income",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))))')
+    worksheet.write('AB455',
+                    '=IFERROR((INDIRECT("N" & MATCH("Gross Income",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144)), IFERROR((1 - (INDIRECT("N" & MATCH("Cost of Goods Sold*",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))),(INDIRECT("N" & MATCH("Operating Income",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))))')
+    worksheet.write('X462', '=D476')
+    worksheet.write('Y462', '=E476')
+    worksheet.write('Z462', '=F476')
+    worksheet.write('AA462', '=G476')
+    worksheet.write('AB462', '=H476')
+    worksheet.write('X463',
+                    '=(INDIRECT("J" & MATCH("SG&A Expense",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Y463',
+                    '=(INDIRECT("K" & MATCH("SG&A Expense",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Z463',
+                    '=(INDIRECT("L" & MATCH("SG&A Expense",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AA463',
+                    '=(INDIRECT("M" & MATCH("SG&A Expense",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AB463',
+                    '=(INDIRECT("N" & MATCH("SG&A Expense",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('X470', '=D476')
+    worksheet.write('Y470', '=E476')
+    worksheet.write('Z470', '=F476')
+    worksheet.write('AA470', '=G476')
+    worksheet.write('AB470', '=H476')
+    worksheet.write('X471',
+                    '=(INDIRECT("J" & MATCH("Depreciation & Amortization Expense",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Y471',
+                    '=(INDIRECT("K" & MATCH("Depreciation & Amortization Expense",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Z471',
+                    '=(INDIRECT("L" & MATCH("Depreciation & Amortization Expense",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AA471',
+                    '=(INDIRECT("M" & MATCH("Depreciation & Amortization Expense",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AB471',
+                    '=(INDIRECT("N" & MATCH("Depreciation & Amortization Expense",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('X482', '=D476')
+    worksheet.write('Y482', '=E476')
+    worksheet.write('Z482', '=F476')
+    worksheet.write('AA482', '=G476')
+    worksheet.write('AB482', '=H476')
+    worksheet.write('X483',
+                    '=(INDIRECT("J" & MATCH("Total Current Assets",B145:B403,0) +144) - INDIRECT("J" & MATCH("Total Current Liabilities",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Y483',
+                    '=(INDIRECT("K" & MATCH("Total Current Assets",B145:B403,0) +144) - INDIRECT("K" & MATCH("Total Current Liabilities",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Z483',
+                    '=(INDIRECT("L" & MATCH("Total Current Assets",B145:B403,0) +144) - INDIRECT("L" & MATCH("Total Current Liabilities",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AA483',
+                    '=(INDIRECT("M" & MATCH("Total Current Assets",B145:B403,0) +144) - INDIRECT("M" & MATCH("Total Current Liabilities",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AB483',
+                    '=(INDIRECT("N" & MATCH("Total Current Assets",B145:B403,0) +144) - INDIRECT("N" & MATCH("Total Current Liabilities",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('X490', '=D476')
+    worksheet.write('Y490', '=E476')
+    worksheet.write('Z490', '=F476')
+    worksheet.write('AA490', '=G476')
+    worksheet.write('AB490', '=H476')
+    worksheet.write('X491',
+                    '=(INDIRECT("J" & MATCH("Net Property, Plant & Equipment",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Y491',
+                    '=(INDIRECT("K" & MATCH("Net Property, Plant & Equipment",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Z491',
+                    '=(INDIRECT("L" & MATCH("Net Property, Plant & Equipment",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AA491',
+                    '=(INDIRECT("M" & MATCH("Net Property, Plant & Equipment",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AB491',
+                    '=(INDIRECT("N" & MATCH("Net Property, Plant & Equipment",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('X498', '=D476')
+    worksheet.write('Y498', '=E476')
+    worksheet.write('Z498', '=F476')
+    worksheet.write('AA498', '=G476')
+    worksheet.write('AB498', '=H476')
+    worksheet.write('X499',
+                    '=(INDIRECT("J" & MATCH("Intangible Assets",B145:B403,0) +144))/(INDIRECT("J" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Y499',
+                    '=(INDIRECT("K" & MATCH("Intangible Assets",B145:B403,0) +144))/(INDIRECT("K" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('Z499',
+                    '=(INDIRECT("L" & MATCH("Intangible Assets",B145:B403,0) +144))/(INDIRECT("L" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AA499',
+                    '=(INDIRECT("M" & MATCH("Intangible Assets",B145:B403,0) +144))/(INDIRECT("M" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AB499',
+                    '=(INDIRECT("N" & MATCH("Intangible Assets",B145:B403,0) +144))/(INDIRECT("N" & MATCH("Sales/Revenue",B145:B403,0) +144))')
+    worksheet.write('AK453', '=K476')
+    worksheet.write('AL453', '=L476')
+    worksheet.write('AM453', '=M476')
+    worksheet.write('AN453', '=N476')
+    worksheet.write('AK454', '=Y455-X455')
+    worksheet.write('AL454', '=Z455-Y455')
+    worksheet.write('AM454', '=AA455-Z455')
+    worksheet.write('AN454', '=AB455-AA455')
+    worksheet.write('AK462', '=K476')
+    worksheet.write('AL462', '=L476')
+    worksheet.write('AM462', '=M476')
+    worksheet.write('AN462', '=N476')
+    worksheet.write('AK463', '=Y463-X463')
+    worksheet.write('AL463', '=Z463-Y463')
+    worksheet.write('AM463', '=AA463-Z463')
+    worksheet.write('AN463', '=AB463-AA463')
+    worksheet.write('AK473', '=K476')
+    worksheet.write('AL473', '=L476')
+    worksheet.write('AM473', '=M476')
+    worksheet.write('AN473', '=N476')
+    worksheet.write('AK474', '=Y471-X471')
+    worksheet.write('AL474', '=Z471-Y471')
+    worksheet.write('AM474', '=AA471-Z471')
+    worksheet.write('AN474', '=AB471-AA471')
+    worksheet.write('AK483', '=K476')
+    worksheet.write('AL483', '=L476')
+    worksheet.write('AM483', '=M476')
+    worksheet.write('AN483', '=N476')
+    worksheet.write('AK484', '=Y483-X483')
+    worksheet.write('AL484', '=Z483-Y483')
+    worksheet.write('AM484', '=AA483-Z483')
+    worksheet.write('AN484', '=AB483-AA483')
+    worksheet.write('AK491', '=K476')
+    worksheet.write('AL491', '=L476')
+    worksheet.write('AM491', '=M476')
+    worksheet.write('AN491', '=N476')
+    worksheet.write('AK492', '=Y491-X491')
+    worksheet.write('AL492', '=Z491-Y491')
+    worksheet.write('AM492', '=AA491-Z491')
+    worksheet.write('AN492', '=AB491-AA491')
+    worksheet.write('AK499', '=K476')
+    worksheet.write('AL499', '=L476')
+    worksheet.write('AM499', '=M476')
+    worksheet.write('AN499', '=N476')
+    worksheet.write('AK500', '=Y499-X499')
+    worksheet.write('AL500', '=Z499-Y499')
+    worksheet.write('AM500', '=AA499-Z499')
+    worksheet.write('AN500', '=AB499-AA499')
+    worksheet.write('D475', '="EOY ROIC"')
+    worksheet.write('J465', '="EOY Pretax ROIC"')
+    worksheet.write('K475', '="Change in EOY ROIC"')
+    worksheet.write('J485', '="Cash Tax Rate"')
+    worksheet.write('Q460', '="Operating Margin"')
+    worksheet.write('Q470', '="Change in EOY Pretax ROIC"')
+    worksheet.write('Q479', '="Change in Cash Tax Rate"')
+    worksheet.write('Q488', '="Invested Capital / Sales"')
+    worksheet.write('X453', '="Gross Margin"')
+    worksheet.write('X461', '="SGA / Sales"')
+    worksheet.write('X469', '="Depreciation / Sales"')
+    worksheet.write('X481', '="Op WC / Sales"')
+    worksheet.write('X489', '="PPE / Sales"')
+    worksheet.write('X497', '="Intangibles / Sales"')
+    worksheet.write('AE461', '="Change in Operating Margin"')
+    worksheet.write('AE490', '="Change in Invested Capital / Sales"')
+    worksheet.write('AK452', '="Change in Gross Margin / Sales"')
+    worksheet.write('AK461', '="Change in SGA / Sales"')
+    worksheet.write('AK472', '="Change in Depreciation / Sales"')
+    worksheet.write('AK482', '="Change in Op WC / Sales"')
+    worksheet.write('AK490', '="Change in PPE / Sales"')
+    worksheet.write('AK498', '="Change in Intagibles / Sales"')
+
+    #END SUPERTREE --------------------------------------------------------------------------------------------------------------------------------------------------
+
 
     #streamline this
     worksheet.write('K12','=D78')
@@ -669,6 +998,11 @@ for ticker in tickers:
     #additons
     #=IF(STDEV.P(J146:N146)<0.1,IF(COUNTIF(J146:N146,">0")=5,"pos_trend"),"") where J146:N146 is a range of annual data
         # checks if the data isn't deviating too much, and if it isn't, whether there is a positive trend
+worksheet = workbook.get_worksheet_by_name("Output Text")
+n_row = 1
+for ticker in tickers:
+    worksheet.write('B' + str(n_row), '=' + ticker + '!K17')
+    n_row += 1
 
 workbook.close()
 
@@ -1016,7 +1350,7 @@ print "Program took", (time.time() - start_time)/60 , "minutes to run"
 
 
 
-
+#Add T to number converter
 
 
 
